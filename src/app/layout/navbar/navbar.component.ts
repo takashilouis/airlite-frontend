@@ -24,24 +24,66 @@ export class NavbarComponent implements OnInit {
   guests = "Add guests";
   dates = "Any weeks";
 
-  //login() => this.authService.login();
+  login() => this.authService.login();
+  logout() => this.authService.logout(); 
+
   currentMenuItems: MenuItem[] | undefined = [];
   toastService = inject(ToastService);
+  authService = inject(AuthService);
+  
+  constructor() {
+    effect(() => {
+      if(this.authService.fetchUser().status === "OK"){
+        this.connectedUser = this.authService.fetchUser().value!;
+        this.currentMenuItems = this.fetchMenu();
+      }
+    })
+  }
   
   ngOnInit(): void{
-    this.currentMenuItems = this.fetchMenu();
-    this.toastService.send({severity: "info", summary: "Welcome to Airbnb"});
+    //this.currentMenuItems = this.fetchMenu();
+    this.authService.fetch(false);
+    //this.toastService.send({severity: "info", summary: "Welcome to Airbnb"});
   }
 
   private fetchMenu():MenuItem[]{
+    if(this.authService.isAuthenticated()){
+      return [
+        {
+          label: "My properties",
+          routerLink: "landlord/properties",
+          visible: this.hasToBeLandlord()
+        },
+        {
+          label: "My booking",
+          routerLink: "booking"
+        },
+        { 
+          label: "My reservation",
+          routerLink: "reservation",
+          visible: this.hasToBeLandlord()
+        },
+        {
+          label: "Log out",
+          commmand: this.logout
+        } 
+      ]
+    } else {
      return [
       { 
         label: "Sign up",
-        styleClass: "font-bold"
+        styleClass: "font-bold",
+        command: this.login
       },
       {
-        label: "Log in"
+        label: "Log in",
+        command: this.login
       }
      ]
+    }
+  }
+
+  hasToBeLandlord(): boolean{
+    return this.authService.hasAnyAuthority(["ROLE_LANDLORD"]);
   }
 }
