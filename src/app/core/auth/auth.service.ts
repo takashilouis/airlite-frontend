@@ -1,6 +1,10 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { computed, inject, Injectable, signal, WritableSignal } from '@angular/core';
+import { HttpClient, HttpParams, HttpStatusCode } from '@angular/common/http';
 import { Location } from '@angular/common';
+import { Observable } from "rxjs";
+import { State } from '../model/state.model';
+import { User } from '../model/user.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +23,7 @@ export class AuthService {
       next: user => this.fetchUser$.set(State.Builder<User>().forSuccess(user)),
       error: err => {
         if(err.status === HttpStatusCode.Unauthorized && this.isAuthenticated()){
-          thius.fetchUser$.get(State.Builder<User>().forSuccess({email: this.notConnected}));
+          this.fetchUser$.set(State.Builder<User>().forSuccess({email: this.notConnected}));
         } else {
           this.fetchUser$.set(State.Builder<User>().forError(err));
         }
@@ -32,7 +36,7 @@ export class AuthService {
   }
 
   logout(): void {
-    this.http.post(`${envifonment.API_URL}/auth/logout`,{})
+    this.http.post(`${environment.API_URL}/auth/logout`,{})
       .subscribe({
         next: (response: any) => {
           this.fetchUser$.set(State.Builder<User>()
@@ -59,7 +63,8 @@ export class AuthService {
   }
   
   hasAnyAuthority(authorities: string[] | string): boolean{
-    if(this.fetchUser$.value!.email === this.notConnected){
+    const userState = this.fetchUser$();
+    if(!userState.value || userState.value.email === this.notConnected){
       return false;
     } 
 
@@ -67,7 +72,7 @@ export class AuthService {
       authorities = [authorities];
     }
 
-    return this.fetchUser$().value!.authorities!
+    return userState.value.authorities!
       .some((authority: string) => authorities.includes(authority));
   }
 }

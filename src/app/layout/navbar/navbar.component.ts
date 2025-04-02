@@ -9,6 +9,10 @@ import { AvatarComponent } from './avatar/avatar.component';
 import { MenuItem } from 'primeng/api';
 import { ToastService } from '../toast.service';
 import { MessageService} from "primeng/api";
+import { AuthService } from '../../core/auth/auth.service';
+import { effect } from '@angular/core';
+import { User } from '../../core/model/user.model';
+import { State } from '../../core/model/state.model';
 
 @Component({
   selector: 'app-navbar',
@@ -23,9 +27,15 @@ export class NavbarComponent implements OnInit {
   location = "Anywhere";
   guests = "Add guests";
   dates = "Any weeks";
+  connectedUser: User | undefined;
 
-  login() => this.authService.login();
-  logout() => this.authService.logout(); 
+  login() { 
+    this.authService.login();
+  }
+
+  logout() {
+    this.authService.logout();
+  }
 
   currentMenuItems: MenuItem[] | undefined = [];
   toastService = inject(ToastService);
@@ -33,8 +43,9 @@ export class NavbarComponent implements OnInit {
   
   constructor() {
     effect(() => {
-      if(this.authService.fetchUser().status === "OK"){
-        this.connectedUser = this.authService.fetchUser().value!;
+      const userState = this.authService.fetchUser()();
+      if(userState.status === 'OK' && userState.value) {
+        this.connectedUser = userState.value;
         this.currentMenuItems = this.fetchMenu();
       }
     })
@@ -65,7 +76,7 @@ export class NavbarComponent implements OnInit {
         },
         {
           label: "Log out",
-          commmand: this.logout
+          command: () => this.logout()
         } 
       ]
     } else {
@@ -73,11 +84,11 @@ export class NavbarComponent implements OnInit {
       { 
         label: "Sign up",
         styleClass: "font-bold",
-        command: this.login
+        command: () => this.login()
       },
       {
         label: "Log in",
-        command: this.login
+        command: () => this.login()
       }
      ]
     }
