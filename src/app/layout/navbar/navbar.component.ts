@@ -1,18 +1,18 @@
-import { Component, OnInit, inject} from '@angular/core';
+import { Component, OnInit, inject, effect} from '@angular/core';
 import { ButtonModule} from 'primeng/button';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MenuModule} from "primeng/menu";
 import { ToolbarModule } from 'primeng/toolbar';
-import { DialogService } from 'primeng/dynamicdialog';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { CategoryComponent } from './category/category.component';
 import { AvatarComponent } from './avatar/avatar.component';
 import { MenuItem } from 'primeng/api';
 import { ToastService } from '../toast.service';
 import { MessageService} from "primeng/api";
 import { AuthService } from '../../core/auth/auth.service';
-import { effect } from '@angular/core';
 import { User } from '../../core/model/user.model';
 import { State } from '../../core/model/state.model';
+import {PropertiesCreateComponent} from "../../landlord/properties-create/properties-create.component";
 
 @Component({
   selector: 'app-navbar',
@@ -27,7 +27,7 @@ export class NavbarComponent implements OnInit {
   location = "Anywhere";
   guests = "Add guests";
   dates = "Any weeks";
-  connectedUser: User | undefined;
+  //onnectedUser: User | undefined;
 
   login() { 
     this.authService.login();
@@ -38,27 +38,49 @@ export class NavbarComponent implements OnInit {
   }
 
   currentMenuItems: MenuItem[] | undefined = [];
+  
   toastService = inject(ToastService);
   authService = inject(AuthService);
-  
+  dialogService = inject(DialogService);
+  ref: DynamicDialogRef | undefined;
+
+  public connectedUser: User = {email: this.authService.notConnected};
   constructor() {
     effect(() => {
       const userState = this.authService.fetchUser()();
-      if(userState.status === 'OK' && userState.value) {
-        this.connectedUser = userState.value;
+      if(userState.status === "OK") {
+        this.connectedUser = userState.value!;
         this.currentMenuItems = this.fetchMenu();
       }
-    })
+    });
   }
   
   ngOnInit(): void{
-    //this.currentMenuItems = this.fetchMenu();
+    // Debug authentication state
+    console.log('Initial auth state:', {
+      isAuthenticated: this.authService.isAuthenticated(),
+      currentUser: this.authService.fetchUser()(),
+      connectedUser: this.connectedUser
+    });
+    
+    // Force a sync to ensure we have the latest data
     this.authService.fetch(false);
-    //this.toastService.send({severity: "info", summary: "Welcome to Airbnb"});
+    
+    // Check the menu that's being shown
+    console.log('Initial menu:', this.fetchMenu());
   }
 
   private fetchMenu():MenuItem[]{
-    if(this.authService.isAuthenticated()){
+    const isAuth = this.authService.isAuthenticated();
+    console.log("Authentication check:", {
+      isAuthenticated: isAuth,
+      userState: this.authService.fetchUser()(),
+      userEmail: this.authService.fetchUser()().value?.email,
+      notConnected: this.authService.notConnected
+    });
+    
+    if(isAuth){
+      console.log("User is authenticated, showing authenticated menu");
       return [
         {
           label: "My properties",
@@ -80,6 +102,7 @@ export class NavbarComponent implements OnInit {
         } 
       ]
     } else {
+      console.log("iNotsAuthenticated");
      return [
       { 
         label: "Sign up",
@@ -96,5 +119,17 @@ export class NavbarComponent implements OnInit {
 
   hasToBeLandlord(): boolean{
     return this.authService.hasAnyAuthority(["ROLE_LANDLORD"]);
+  }
+
+  openNewListing(): void{
+    this.ref = this.dialogService.open(PropertiesCreateComponent,
+     { 
+        width:"60%",
+        header: "Airbnb your home",
+        closable: true,
+        focusOnShow: true,
+        modal: true,
+        showHeader: true
+     })
   }
 }
