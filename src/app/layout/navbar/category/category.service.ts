@@ -51,8 +51,8 @@ export class CategoryService {
     },
     {
       icon: "water",
-      displayName: "beach",
-      technicalName: "BEACH",
+      displayName: "Lake",
+      technicalName: "LAKE",
       activated: false
     },
     {
