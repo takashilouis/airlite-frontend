@@ -106,7 +106,7 @@ export class CategoryService {
     {
       icon: "mug-saucer",
       displayName: "Bed & breakfasts",
-      technicalName: "BED_AND_BREAKFASTS",
+      technicalName: "BED_AND_BREAKFAST",
       activated: false
     },
     {

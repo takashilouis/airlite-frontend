@@ -24,7 +24,7 @@ export class LocationMapComponent {
   private provider: OpenStreetMapProvider | undefined;
   
   location = input.required<string>();
-  placeholder = input<string>("Seleect your home country");
+  placeholder = input<string>("Select your home country");
   currentLocation: Country | undefined;
 
   @Output()
@@ -77,9 +77,11 @@ export class LocationMapComponent {
   private listenToLocation() {
     effect(() => {
       const countriesState = this.countryService.countries();
+      console.log('Countries state:', countriesState);
       if (countriesState.status === "OK" && countriesState.value) {
         this.countries = countriesState.value;
         this.filteredCountries = countriesState.value;
+        //console.log('Countries loaded in component:', this.countries.length);
         this.changeMapLocation(this.location())
       } else if (countriesState.status === "ERROR") {
         this.toastService.send({
@@ -108,8 +110,11 @@ export class LocationMapComponent {
   }
 
   search(newCompleteEvent: AutoCompleteCompleteEvent): void {
-    this.filteredCountries =
-      this.countries.filter(country => country.name.common.toLowerCase().startsWith(newCompleteEvent.query))
+    const query = newCompleteEvent.query.toLowerCase();
+    this.filteredCountries = this.countries.filter(country => 
+      country.name.common.toLowerCase().includes(query)
+      //country.name.official.toLowerCase().includes(query)
+    );
   }
 
   protected readonly filter = filter;
