@@ -2,7 +2,7 @@ import { inject, Injectable, signal, WritableSignal, computed} from '@angular/co
 import { HttpClient, HttpParams} from "@angular/common/http";
 import { State } from '../core/model/state.model';
 import { Page, Pagination, createPaginationOption} from '../core/model/request.model';
-import { CardListing } from '../landlord/model/listing.model';
+import { CardListing, Listing } from '../landlord/model/listing.model';
 import { CategoryName } from '../layout/navbar/category/category.model';
 import { environment } from '../../environments/environment';
 
@@ -15,6 +15,11 @@ export class TenantListingService {
   = signal(State.Builder<Page<CardListing>>().forInit())
   getAllByCategorySig = computed(() => this.getAllByCategory$());
   
+  private getOneByPublicId$: WritableSignal<State<Listing>>
+    = signal(State.Builder<Listing>().forInit())
+  getOneByPublicIdSig = computed(() => this.getOneByPublicId$());
+
+
   constructor() {}
 
   getAllByCategory(pageRequest: Pagination, category: CategoryName) : void {
@@ -32,4 +37,16 @@ export class TenantListingService {
     this.getAllByCategory$.set(State.Builder<Page<CardListing>>().forInit())
   }
 
+  getOneByPublicId(publicId: string): void {
+    const params = new HttpParams().set("publicId", publicId);
+    this.http.get<Listing>(`${environment.API_URL}/tenant-listing/get-one`, {params})
+      .subscribe({
+        next: listing => this.getOneByPublicId$.set(State.Builder<Listing>().forSuccess(listing)),
+        error: err => this.getOneByPublicId$.set(State.Builder<Listing>().forError(err)),
+      });
+  }
+
+  resetGetOneByPublicId(): void {
+    this.getOneByPublicId$.set(State.Builder<Listing>().forInit())
+  }
 }
