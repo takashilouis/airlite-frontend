@@ -44,21 +44,9 @@ export class CategoryService {
       activated: false
     },
     {
-      icon: "tower-observation",
-      displayName: "artic",
-      technicalName: "ARTIC",
-      activated: false
-    },
-    {
       icon: "water",
       displayName: "Lake",
       technicalName: "LAKE",
-      activated: false
-    },
-    {
-      icon: "tower-observation",
-      displayName: "artic",
-      technicalName: "ARTIC",
       activated: false
     },
     {

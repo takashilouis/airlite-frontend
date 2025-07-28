@@ -10,7 +10,7 @@ import {map} from "rxjs";
 import {NgClass} from "@angular/common";
 import {FaIconComponent} from "@fortawesome/angular-fontawesome";
 import {AvatarComponent} from "../../layout/navbar/avatar/avatar.component";
-//import {BookDateComponent} from "../book-date/book-date.component";
+import {BookDateComponent} from "../book-date/book-date.component";
 
 @Component({
   selector: 'app-display-listing',
@@ -19,7 +19,7 @@ import {AvatarComponent} from "../../layout/navbar/avatar/avatar.component";
     NgClass,
     FaIconComponent,
     AvatarComponent,
-    //BookDateComponent
+    BookDateComponent
   ],
   templateUrl: './display-listing.component.html',
   styleUrl: './display-listing.component.scss'
