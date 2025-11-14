@@ -1,18 +1,19 @@
-import { Component, OnInit, inject, effect} from '@angular/core';
-import { ButtonModule} from 'primeng/button';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { MenuModule} from "primeng/menu";
-import { ToolbarModule } from 'primeng/toolbar';
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { CategoryComponent } from './category/category.component';
-import { AvatarComponent } from './avatar/avatar.component';
-import { MenuItem } from 'primeng/api';
-import { ToastService } from '../toast.service';
-import { MessageService} from "primeng/api";
-import { AuthService } from '../../core/auth/auth.service';
-import { User } from '../../core/model/user.model';
-import { State } from '../../core/model/state.model';
+import {Component, effect, inject, OnInit} from '@angular/core';
+import {ButtonModule} from "primeng/button";
+import {FontAwesomeModule} from "@fortawesome/angular-fontawesome";
+import {ToolbarModule} from "primeng/toolbar";
+import {MenuModule} from "primeng/menu";
+import {CategoryComponent} from "./category/category.component";
+import {AvatarComponent} from "./avatar/avatar.component";
+import {DialogService, DynamicDialogRef} from "primeng/dynamicdialog";
+import {MenuItem} from "primeng/api";
+import {ToastService} from "../toast.service";
+import {AuthService} from "../../core/auth/auth.service";
+import {User} from "../../core/model/user.model";
 import {PropertiesCreateComponent} from "../../landlord/properties-create/properties-create.component";
+import {SearchComponent} from "../../tenant/search/search.component";
+import {ActivatedRoute} from "@angular/router";
+import dayjs from "dayjs";
 
 @Component({
   selector: 'app-navbar',
@@ -93,7 +94,7 @@ export class NavbarComponent implements OnInit {
         },
         { 
           label: "My reservation",
-          routerLink: "reservation",
+          routerLink: "landlord/reservation",
           visible: this.hasToBeLandlord()
         },
         {
@@ -131,5 +132,17 @@ export class NavbarComponent implements OnInit {
         modal: true,
         showHeader: true
      })
+  }
+
+  openNewSearch(): void {
+    this.ref = this.dialogService.open(SearchComponent,
+      {
+        width: "40%",
+        header: "Search",
+        closable: true,
+        focusOnShow: true,
+        modal: true,
+        showHeader: true
+      });
   }
 }
