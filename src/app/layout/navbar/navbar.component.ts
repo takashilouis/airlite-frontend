@@ -13,7 +13,7 @@ import {User} from "../../core/model/user.model";
 import {PropertiesCreateComponent} from "../../landlord/properties-create/properties-create.component";
 import {SearchComponent} from "../../tenant/search/search.component";
 import {ActivatedRoute} from "@angular/router";
-import dayjs from "dayjs";
+//import dayjs from "dayjs";
 
 @Component({
   selector: 'app-navbar',
@@ -43,6 +43,8 @@ export class NavbarComponent implements OnInit {
   toastService = inject(ToastService);
   authService = inject(AuthService);
   dialogService = inject(DialogService);
+  activatedRoute = inject(ActivatedRoute);
+
   ref: DynamicDialogRef | undefined;
 
   public connectedUser: User = {email: this.authService.notConnected};
@@ -145,4 +147,18 @@ export class NavbarComponent implements OnInit {
         showHeader: true
       });
   }
+
+  private extractInformationForSearch(): void{
+    this.activatedRoute.queryParams.subscribe({
+      next: params => {
+        if(params["location"]){
+          this.location = params["location"];
+          this.guests = params["guests"] + " Guests";
+          this.dates = params["startDate"] + " - " + params["endDate"];
+
+        }
+      }
+    });
+  };
+
 }
